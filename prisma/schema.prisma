@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Section {
+  id        Int      @id @default(autoincrement())
+  title     String   @db.VarChar(255)
+  order     Int      @default(0)
+  pages     Page[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([order])
+}
+
+model Page {
+  id              Int              @id @default(autoincrement())
+  title           String           @db.VarChar(255)
+  content         String           @db.Text
+  sectionId       Int
+  section         Section          @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  order           Int              @default(0)
+  metadataImage   String?          @db.VarChar(500)
+  metadataFields  MetadataField[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([sectionId])
+  @@index([order])
+}
+
+model MetadataField {
+  id        Int      @id @default(autoincrement())
+  key       String   @db.VarChar(100)
+  value     String   @db.VarChar(500)
+  pageId    Int
+  page      Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([pageId])
+}
